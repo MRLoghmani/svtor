@@ -15,6 +15,7 @@ nodeIndex = 0							# Index of the last node for which subtree was constructed
 tree = {}								# A dictionary in the format - node: [child1, child2, ..]
 branches = 5							# The branching factor in the vocabulary tree
 leafClusterSize = 20					# Minimum size of the leaf cluster
+imagesInLeaves = {}
 
 def dumpFeatures(rootDir):
 	features = []
@@ -23,7 +24,7 @@ def dumpFeatures(rootDir):
 		for fname in fileList:
 			# print("Reading Image: " + dirName + "/" + fname)
 			img = cv2.imread(dirName + "/" + fname)
-			gray= cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+			gray= cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 			sift = cv2.xfeatures2d.SIFT_create()
 			kp, des = sift.detectAndCompute(gray, None)
 			for d in des:
@@ -39,6 +40,7 @@ def constructTree(node, cluster):
 	global nodeIndex					# Changes made in this variable will be global 
 	global nodes						# Changes made in this variable will be global
 	global tree 						# Changes made in this variable will be global
+	global imagesInLeaves				# Changes made in this variable will be global
 	tree[node] = []
 	if len(cluster) >= leafClusterSize:
 		model.fit(cluster)
@@ -50,6 +52,18 @@ def constructTree(node, cluster):
 			nodes.append(model.cluster_centers_[i])
 			tree[node].append(nodeIndex)
 			constructTree(nodeIndex, childCluster[i])
+	else:
+		imagesInLeaves[node] = []
+
+def tfidf(filename):
+	img = cv2.imread(dirName + "/" + fname)
+	gray= cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+	sift = cv2.xfeatures2d.SIFT_create()
+	kp, des = sift.detectAndCompute(gray, None)	
+	for d in des:
+		leafID = lookup(d)
+		imagesInLeaves[leafID].append(filename)
+
 
 print("Extracting Features: " + rootDir + " ...")
 features = dumpFeatures(rootDir)
@@ -63,7 +77,8 @@ print("Mapping images to leaf nodes of the tree ...")
 for dirName, subdirList, fileList in os.walk(rootDir):
 	n = 0
 	for fname in fileList:
-		# 	
+		filename = dirName + "/" + fname
+		tfidf(filename)
 		n = n + 1
 		if n >= N:
 			break
