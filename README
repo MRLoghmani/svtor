@@ -2,6 +2,13 @@ SCALABLE VOCABULARY RECOGNITION TREE
 Author: Pranshu Gupta, Abhishek Jain
 ====================================================================================
 
+Implemented in Python 3.4, installation script for setting up openCV, sklearn etc., 
+with python3 is included in the repository.
+The link to the repository:
+https://bitbucket.org/pranshug258/svrt/src
+
+====================================================================================
+
 MATCHING RESULTS FOR 20 IMAGES
 ---------------------------------
 00000 :  00000 00001 00002 00003
