@@ -53,7 +53,7 @@ def constructTree(node, cluster, depth):
 			tree[node].append(nodeIndex)
 			constructTree(nodeIndex, childCluster[i], depth + 1)
 	else:
-		imagesInLeaves[node] = []
+		imagesInLeaves[node] = {}
 
 
 def lookup(descriptor, node):
@@ -77,7 +77,10 @@ def tfidf(filename):
 	kp, des = sift.detectAndCompute(gray, None)	
 	for d in des:
 		leafID = lookup(d, 0)
-		imagesInLeaves[leafID].append(filename)
+		if filename in imagesInLeaves[leafID]:
+			imagesInLeaves[leafID][filename] += 1
+		else:
+			imagesInLeaves[leafID][filename] = 1
 
 print("Extracting Features: " + rootDir + " ...")
 features = dumpFeatures(rootDir)
