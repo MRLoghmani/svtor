@@ -1,5 +1,5 @@
 # Implementing Scalable Vocabulary Trees for Object Recognition
-# Author: Pranshu Gupta
+# Group 13, CS676A, IITK
 #------------------------------------------------------------------------------------------------------------
 
 import cv2, time, os, math, operator
