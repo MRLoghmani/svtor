@@ -2,7 +2,7 @@
 # Group 13, CS676A, IITK
 #------------------------------------------------------------------------------------------------------------
 
-import cv2, time, os, math, operator
+import cv2, time, os, math, operator, re
 import numpy as np
 from sklearn.cluster import KMeans
 
@@ -18,6 +18,7 @@ leafClusterSize = 20					# Minimum size of the leaf cluster
 imagesInLeaves = {} 					# Dictionary in the format - leafID: [img1:freq, img2:freq, ..]
 doc = {}
 bestN = 4
+result = np.array([0,0,0,0])
 #------------------------------------------------------------------------------------------------------------
 
 # Function to dump all the SIFT descriptors from training data in the feature space
@@ -88,7 +89,7 @@ def tfidf(filename):
 
 # This function returns the weight of a leaf node
 def weight(leafID):
-	return math.log1p(len(imagesInLeaves[leafID])/1.0*N)
+	return math.log1p(N/1.0*len(imagesInLeaves[leafID]))
 
 # Returns the scores of the images in the dataset
 def getScores(q):
@@ -111,6 +112,18 @@ def findBest(scores, bestN):
 	sorted_scores = sorted(scores.items(), key = operator.itemgetter(1))
 	return sorted_scores[:bestN]
 
+def accuracy(F, M1, M2, M3, M4):
+	a = [0,0,0,0]
+	group = int(F/4)
+	if int(M1/4) == group:
+		a[0] = 1
+	if int(M2/4) == group:
+		a[1] = 1
+	if int(M3/4) == group:
+		a[2] = 1
+	if int(M4/4) == group:
+		a[3] = 1
+	return np.array(a)
 
 # Finds 4 best matches for the query
 def match(filename):
@@ -135,17 +148,20 @@ def match(filename):
 	scores = getScores(q)
 	return findBest(scores, bestN)
 
+def getImgID(s):
+	return int((re.findall("\d+", s))[0])
+
 #------------------------------------------------------------------------------------------------------------
 
-print("Extracting Features: " + rootDir + " ...")
+# print("Extracting Features: " + rootDir + " ...")
 features = dumpFeatures(rootDir)
 
-print("Constructing Vocabulary Tree ... ")
+# print("Constructing Vocabulary Tree ... ")
 root = features.mean(axis = 0)
 nodes[0] = root
 constructTree(0, features, 0)
 
-print("Mapping images to leaf nodes of the tree ...")
+# print("Mapping images to leaf nodes of the tree ...")
 for dirName, subdirList, fileList in os.walk(rootDir):
 	n = 0
 	for fname in fileList:
@@ -167,15 +183,18 @@ for img in doc:
 	for leafID in doc[img]:
 		doc[img][leafID] /= s
 
-print("Finding Best Matches for each image ...")
+# print("Finding Best Matches for each image ...")
 for dirName, subdirList, fileList in os.walk(rootDir):
 	n = 0
 	for fname in fileList:
 		filename = dirName + "/" + fname
 		group = match(filename)
-		print(filename, ": ", group[0][0], group[1][0], group[2][0], group[3][0])
+		# print(getImgID(filename), ": ", getImgID(group[0][0]), getImgID(group[1][0]), getImgID(group[2][0]), getImgID(group[3][0]))
+		# print(getImgID(filename), ": ", accuracy(getImgID(filename), getImgID(group[0][0]), getImgID(group[1][0]), getImgID(group[2][0]), getImgID(group[3][0])))
+		result = result + accuracy(getImgID(filename), getImgID(group[0][0]), getImgID(group[1][0]), getImgID(group[2][0]), getImgID(group[3][0]))
 		n = n + 1
 		if n >= N:
 			break
 
+print(N, branches, leafClusterSize = 20, result/1.0*N)
 #------------------------------------------------------------------------------------------------------------
