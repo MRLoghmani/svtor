@@ -1,11 +1,85 @@
-SCALABLE VOCABULARY RECOGNITION TREE
-Author: Pranshu Gupta, Abhishek Jain
-====================================================================================
+Scalable Vocabulary Trees for Object Recognition
+Group 13, CS676A, IITK
+Assignment 3: REPORT
+======================================================================================
+We implemented Scalable Vocabulary Tree for Object Recognition as described in the 
+paper. This implementation is in 'PYTHON 3' with 'OPENCV 3.1'. 
+If your machine is not set up with PYTHON 3 OPENCV, please use the 'install' script 
+to install the neccessary libraries/opencv etc., so that you can test our 
+implementation.
 
-Implemented in Python 3.4, installation script for setting up openCV, sklearn etc., 
-with python3 is included in the project.
-The link to the repository (bitbucket):
-https://bitbucket.org/pranshug258/svrt/src
 
-====================================================================================
+IMPLEMENTATION DETAILS
+======================================================================================
+1. Extract SIFT keypoints and their feature descriptors for all images in the dataset 
+   and dump them in a list.
+2. Now, construct vocabulary tree using heirarchical KMeans clustering. (We have used
+   MiniBatchKMeans, a faster implementation of the KMeans algorithm).
+3. After we have constructed the vocabulary tree, we map images to the leaf nodes of 
+   the vocabulary tree. We do this by looking up the SIFT descriptors of the image in 
+   the tree by comparing the euclidean distances with cluster centers values at each 
+   node of the tree.
+4. Now, for a query image, we extract the SIFT descriptors and map it to different 
+   leaf node of the vocabulary tree. After that we use the TFID scoring as described in 
+   the paper to score all the images present in the test database. Then, we report the 
+   best four matches for the query image.
+5. Now, if all the four reported images come from the group same as that of the query 
+   image, we say that the result is 100% accurate. Otherwise, it can be 75%, 50%, 25% 
+   or 0%.
+6. To infer the accuracy of the results at a given branch factor or depth, we take the 
+   average of the accuracies observed for all the query images.
 
+
+RESULTS
+======================================================================================
+We have tabulated the results from the experiment in the following format:
+****************************************************
+  B     mD    [ A1     A2     A3     A4 ]    ACC
+****************************************************
+B  : Branch Factor
+mD : Maximum Depth
+A1 : Accuracy of the best matches
+A2 : Accuracy of the second best matches
+A3 : Accuracy of the third best matches
+A4 : Accuracy of the fourth best matches
+ACC: Overall accuracy
+
+Accuracy Measure
+--------------------------------------------------------------------------------------
+We know that the object categories are grouped as sets of four images. So, for 
+accuracy measure we say that the resultis 100% accurate if all of the four best 
+matches come from the corresponding sets.
+
+
+DATASET SIZE : 50 (We started with small set for preliminary analysis)
+--------------------------------------------------------------------------------------
+Varying branch factor while keeping the max depth constant
+3     10    [1.000  0.860  0.700  0.520]    77.00%
+5     10    [1.000  0.940  0.840  0.720]    87.50%
+8     10    [1.000  0.920  0.820  0.800]    88.50%
+10    10    [1.000  1.000  0.860  0.680]    88.50%
+12    10    [1.000  0.960  0.800  0.780]    88.50%
+12    10    [1.000  0.940  0.800  0.760]    87.50%
+15    10    [1.000  0.960  0.840  0.800]    90.00%
+18    10    [1.000  0.960  0.900  0.820]    92.00%
+We can see SLIGHT improvements in the quality of the results as 
+we increase the branch factor.
+
+Varying max depth while keeping the branch factor constant
+5     5     [1.000  0.980  0.860  0.680]    88.00%
+5     6     [1.000  0.920  0.820  0.640]    84.50%
+5     7     [1.000  0.880  0.740  0.680]    82.50%
+5     8     [1.000  0.940  0.740  0.520]    80.00%
+5     10    [1.000  0.860  0.700  0.660]    80.50%
+Results DO NOT improve with increasing depth of the vocabulary 
+tree. Also, in some cases the accuracy is lost.
+
+
+Now, we move to bigger sets to analyse improvements by varying the branching factor.
+
+DATASET SIZE : 500
+--------------------------------------------------------------------------------------
+5     10    [1.000  0.718  0.584  0.396]    67.45%
+6     10    [1.000  0.744  0.580  0.442]    69.15%
+8     10    [1.000  0.762  0.588  0.466]    70.40%
+10    10    [1.000  0.776  0.630  0.454]    71.50%
